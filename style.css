@@ -92,3 +92,7 @@ textarea {
   color: red;
   text-decoration: line-through;
 }
+
+.on-sale {
+  color: red;
+}

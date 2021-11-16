@@ -1,35 +1,105 @@
-var app = new Vue({
-  el: "#app",
-  data: {
-    product: "Socks",
-    brand: "Vue Mastery",
-    selectedVariant: 0,
-    details: ["80% cotton", "20% polyester", "Gender-neutral"],
-    variants: [
-      {
-        variantId: 2234,
-        variantColor: "green",
-        variantImage: "./assets/vmSocks-green-onWhite.jpeg",
-        variantQuantity: 100,
-        onSale: true,
-      },
-      {
-        variantId: 2235,
-        variantColor: "blue",
-        variantImage: "./assets/vmSocks-blue-onWhite.jpeg",
-        variantQuantity: 0,
-        onSale: false,
-      },
-    ],
-    sizes: [
-      { sizeVariant: "S", sizeId: 1 },
-      { sizeVariant: "M", sizeId: 2 },
-    ],
-    cart: 0,
-    onSale: true,
+Vue.component("product-details", {
+  props: {
+    details: {
+      type: Array,
+      required: true,
+    },
+  },
+  template: `
+    <ul>
+      <li v-for="detail in details">{{ detail }}</li>
+    </ul>
+  `,
+});
+
+Vue.component("product", {
+  props: {
+    premium: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  template: `
+    <div class="product">
+            <div class="product-image">
+                 <img v-bind:src="image">
+            </div>
+
+            <div class="product-info">
+                <h1>{{title}}</h1>
+                <p v-if="inStock">In Stock</p>
+                <p v-else
+                class="out-of-stock"
+                >Out of Stock</p>
+                <p>Shipping: {{shipping}}</p>
+
+                <product-details :details="details"></product-details>
+                
+                <p>{{sale}}</p>
+
+                <div v-for="(variant, index) in variants" 
+                    :key="variant.variantId"
+                    class="color-box"
+                    :style="{backgroundColor: variant.variantColor }"
+                    @mouseover="updateProduct(index)">              
+                </div>
+
+                   
+                <div v-for="size in sizes" :key="size.sizeId">
+                    <p>{{size.sizeVariant}}</p>
+                </div>
+                
+                    <button 
+                    v-on:click="addToCart" 
+                    :disabled="!inStock"
+                    :class="{disabledButton: !inStock}"
+                    >Add to Cart
+                    </button>
+
+                    <button 
+                    v-on:click="subtractFromCart"
+                    :disabled="!inStock"
+                    :class="{disabledButton: !inStock}"
+                    >
+                    Remove from Cart
+                </button>
+
+                <div class="cart">
+                    <p>Cart({{cart}})</p>
+                </div>
+            </div>
+        </div>
+`,
+  data() {
+    return {
+      product: "Socks",
+      brand: "Vue Mastery",
+      selectedVariant: 0,
+      details: ["80% cotton", "20% polyester", "Gender-neutral"],
+      variants: [
+        {
+          variantId: 2234,
+          variantColor: "green",
+          variantImage: "./assets/vmSocks-green-onWhite.jpeg",
+          variantQuantity: 100,
+        },
+        {
+          variantId: 2235,
+          variantColor: "blue",
+          variantImage: "./assets/vmSocks-blue-onWhite.jpeg",
+          variantQuantity: 0,
+        },
+      ],
+      sizes: [
+        { sizeVariant: "S", sizeId: 1 },
+        { sizeVariant: "M", sizeId: 2 },
+      ],
+      cart: 0,
+      onSale: true,
+    };
   },
   methods: {
-    addToCart() {
+    addToCart: function () {
       this.cart += 1;
     },
     subtractFromCart() {
@@ -50,11 +120,25 @@ var app = new Vue({
     inStock() {
       return this.variants[this.selectedVariant].variantQuantity;
     },
+    shipping() {
+      if (this.premium) {
+        return "Free";
+      }
+      return 2.99;
+    },
     sale() {
       if (this.onSale) {
         return this.brand + " " + this.product + " are on sale!";
       }
       return this.brand + " " + this.product + " are not on sale";
     },
+  },
+});
+
+var app = new Vue({
+  el: "#app",
+  data: {
+    premium: false,
+    details: true,
   },
 });
